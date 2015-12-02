@@ -33,22 +33,23 @@ class Shade(object):
 		self.shadeargs = kwargs
 	def set_lineargs(self, **kwargs):
 		self.lineargs = kwargs
+	def get_line(self, q=0.5):
+		assert len(self.ys) > 0, self.ys
+		return scipy.stats.mstats.mquantiles(self.ys, q, axis=0)[0]
 	def shade(self, q=0.341, **kwargs):
 		""" Use the stored predictions to plot a shaded region
 		using 0.5-q and 0.5+q as limits. """
-		assert len(self.ys) > 0, self.ys
 		shadeargs = dict(self.shadeargs)
 		shadeargs.update(kwargs)
-		lo = scipy.stats.mstats.mquantiles(self.ys, 0.5 - q, axis=0)[0]
-		hi = scipy.stats.mstats.mquantiles(self.ys, 0.5 + q, axis=0)[0]
-		plt.fill_between(self.x, lo, hi, **shadeargs)
+		lo = self.get_line(0.5 - q)
+		hi = self.get_line(0.5 + q)
+		return plt.fill_between(self.x, lo, hi, **shadeargs)
 	def line(self, **kwargs):
 		""" Use the stored predictions to plot the median """
-		assert len(self.ys) > 0, self.ys
 		lineargs = dict(self.lineargs)
 		lineargs.update(kwargs)
-		mid = scipy.stats.mstats.mquantiles(self.ys, 0.5, axis=0)[0]
-		plt.plot(self.x, mid, **lineargs)
+		mid = self.get_line(0.5)
+		return plt.plot(self.x, mid, **lineargs)
 
 __doc__ = Shade.__doc__
 __all__ = ['Shade']
